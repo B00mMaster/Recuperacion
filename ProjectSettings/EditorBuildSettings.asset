@@ -17,4 +17,13 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Game.unity
     guid: ff79afa2210de7c4b8958d92a3bc3969
+  - enabled: 1
+    path: Assets/Scenes/Game_Poison.unity
+    guid: 46d172dc4d32ac74990a6c5b8fd35077
+  - enabled: 1
+    path: Assets/Scenes/Game_PowerUp.unity
+    guid: a4baac4b6e6b82f48aa3695a11a5bb25
+  - enabled: 1
+    path: Assets/Scenes/Game_Timer.unity
+    guid: a66072f0da46f9e4a9b90718dff6280f
   m_configObjects: {}

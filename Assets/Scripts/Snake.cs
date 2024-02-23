@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Snake : MonoBehaviour
 {
@@ -143,6 +145,11 @@ public class Snake : MonoBehaviour
         state = State.Alive;
     }
 
+    Timer timer;
+    private void Start()
+    {
+        timer = FindObjectOfType<Timer>();
+    }
     private void Update()
     {
         switch (state)
@@ -210,6 +217,13 @@ public class Snake : MonoBehaviour
                 // El cuerpo crece
                 snakeBodySize++;
                 CreateBodyPart();
+                //Si estamos en la escena GameTimer, se activará el contrareloj
+                if(SceneManager.GetActiveScene().name == "Game_Timer")
+                {
+                    timer.AddTime();
+
+                }
+
             }
 
             if (snakeMovePositionsList.Count > snakeBodySize)
@@ -217,30 +231,43 @@ public class Snake : MonoBehaviour
                 snakeMovePositionsList.
                     RemoveAt(snakeMovePositionsList.Count - 1);
             }
-
-            bool snakeAtePoisonFood1 = levelGrid.TrySnakeEatPoisonFood1(gridPosition);
-            if(snakeAtePoisonFood1)
+            //Cada vez que snake coma poisonFood en GamePoisonScene, se duplica su velocidad
+            if (SceneManager.GetActiveScene().name == "Game_Poison")
             {
-                gridMoveTimerMax = 0.1f;
-            }
-            
-            
-            bool snakeAtePowerUp = levelGrid.TrySnakeEatPowerUp(gridPosition);
-            if (snakeAtePowerUp)
-            {
-                eatPowerUpBool = true;
-                levelGrid.hasPowerUp = true;
-                ScoreUI.Instance.Countdown();
-                StartCoroutine(ResetPowerUpBool());
-            }
+                bool snakeAtePoisonFood1 = levelGrid.TrySnakeEatPoisonFood1(gridPosition);
+                if (snakeAtePoisonFood1)
+                {
+                    gridMoveTimerMax = gridMoveTimerMax / 2;
+                }
+                //si snake come poisonFood2, se activa snkeDied, GameOver
+                bool snakeAtePoisonFood2 = levelGrid.TrySnakeEatPoisonFood2(gridPosition);
+                if (snakeAtePoisonFood2)
+                {
+                    state = State.Dead;
+                    GameManager.Instance.SnakeDied();
 
+                }
+            }
+            //Si estamos en la escena del PowerUp y chocamos con él, no podremos morir mediante a un bool true
+            if (SceneManager.GetActiveScene().name == "Game_PowerUp")
+            {
+                bool snakeAtePowerUp = levelGrid.TrySnakeEatPowerUp(gridPosition);
+                if (snakeAtePowerUp)
+                {
+                    eatPowerUpBool = true;
+                    levelGrid.hasPowerUp = true;
+                    ScoreUI.Instance.Countdown();
+                    StartCoroutine(ResetPowerUpBool());
+                }
+            }
+            //despues de 5s, el bool vuelve a permititr que snake pueda morir al chocarse
              System.Collections.IEnumerator ResetPowerUpBool()
              {
                 yield return new WaitForSeconds(5f);
 
-                eatPowerUpBool = false;
-                levelGrid.hasPowerUp = false;
-                Debug.Log("PU_OFF");
+                eatPowerUpBool = false; //permite o no morir
+                levelGrid.hasPowerUp = false;//permite o no comer powerUp
+                //Debug.Log("PU_OFF");
              }
 
 
@@ -253,6 +280,7 @@ public class Snake : MonoBehaviour
                     // GAME OVER
                     state = State.Dead;
                     GameManager.Instance.SnakeDied();
+                    
                 }
             }
 
@@ -262,47 +290,68 @@ public class Snake : MonoBehaviour
         }
     }
 
+
+    bool canMove=true;
     private void HandleMoveDirection()
     {
         horizontalInput = Input.GetAxisRaw("Horizontal");
         verticalInput = Input.GetAxisRaw("Vertical");
         
-        // Cambio dirección hacia arriba
-        if (verticalInput > 0) // Si he pulsado hacia arriba (W o Flecha Arriba)
+        //Si pulso los dos inputs a la vez, snake no cambiará de dirección.
+        if(horizontalInput!=0 && verticalInput!=0)
         {
-            if (gridMoveDirection != Direction.Down) // Si iba en horizontal
-            {
-                // Cambio la dirección hacia arriba (0,1)
-                gridMoveDirection = Direction.Up;
-            }
+            canMove = false;
+            
         }
-        
-        // Cambio dirección hacia abajo
-        // Input es abajo?
-        if (verticalInput < 0)
+        else
         {
-            // Mi dirección hasta ahora era horizontal
-            if (gridMoveDirection != Direction.Up)
-            {
-                gridMoveDirection = Direction.Down;
-            }
+            
+            canMove = true;
         }
 
-        // Cambio dirección hacia derecha
-        if (horizontalInput > 0)
-        {
-            if (gridMoveDirection != Direction.Left)
+           if(canMove==true)
+           {
+            // Cambio dirección hacia arriba
+            if (verticalInput > 0) // Si he pulsado hacia arriba (W o Flecha Arriba)
             {
-                gridMoveDirection = Direction.Right;
+                if (gridMoveDirection != Direction.Down) // Si iba en horizontal
+                {
+
+                    // Cambio la dirección hacia arriba (0,1)
+                    gridMoveDirection = Direction.Up;
+                }
+
             }
-        }
-        
-        // Cambio dirección hacia izquierda
-        if (horizontalInput < 0)
-        {
-            if (gridMoveDirection != Direction.Right)
+
+
+            // Cambio dirección hacia abajo
+            // Input es abajo?
+            if (verticalInput < 0)
             {
-                gridMoveDirection = Direction.Left;
+                // Mi dirección hasta ahora era horizontal
+                if (gridMoveDirection != Direction.Up)
+                {
+                    gridMoveDirection = Direction.Down;
+                }
+
+            }
+
+            // Cambio dirección hacia derecha
+            if (horizontalInput > 0)
+            {
+                if (gridMoveDirection != Direction.Left)
+                {
+                    gridMoveDirection = Direction.Right;
+                }
+            }
+
+            // Cambio dirección hacia izquierda
+            if (horizontalInput < 0)
+            {
+                if (gridMoveDirection != Direction.Right)
+                {
+                    gridMoveDirection = Direction.Left;
+                }
             }
         }
     }

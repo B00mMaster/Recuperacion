@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MainMenuUI : MonoBehaviour
@@ -13,10 +14,11 @@ public class MainMenuUI : MonoBehaviour
     [SerializeField] private Button quitHowToPlayPanelButton;
 
     [SerializeField] private GameObject howToPlayPanel;
-
+    [SerializeField] private GameObject chooseLevel;
+  
     private void Awake()
     {
-        playButton.onClick.AddListener(() => {Loader.Load(Loader.Scene.Game);});
+        playButton.onClick.AddListener(ShowLevels);
         howToPlayButton.onClick.AddListener(ShowHowToPlayPanel);
         quitButton.onClick.AddListener(Application.Quit);
         
@@ -36,4 +38,20 @@ public class MainMenuUI : MonoBehaviour
     {
         howToPlayPanel.SetActive(false);
     }
+
+    void ShowLevels()
+    {
+        chooseLevel.SetActive(true);
+    }
+
+    void HideLevels()
+    {
+        chooseLevel.SetActive(false);
+    }
+    
+    public void LoadSceneGame(string Game)
+    {
+        SceneManager.LoadScene(Game);
+    }
+   
 }

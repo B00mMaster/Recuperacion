@@ -1,15 +1,22 @@
+using System.Collections;
+using System.Threading;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class LevelGrid
 {
-    private Vector2Int foodGridPosition, powerUpGridPosition, poisonFoodGridPosition1;
-    private GameObject foodGameObject, powerUpGameObject, poisonFoodGameObject1;
+    private Vector2Int foodGridPosition, powerUpGridPosition, poisonFoodGridPosition1, poisonFoodGridPosition2;
+    private GameObject foodGameObject, powerUpGameObject, poisonFoodGameObject1, poisonFoodGameObject2;
     
     private int width;
     private int height;
-
+    
     public bool hasPowerUp;
-    public bool hasPoisonFood1;
+    
+    
+    
+   
 
     private Snake snake;
 
@@ -23,21 +30,38 @@ public class LevelGrid
     {
         this.snake = snake;
         SpawnFood();
-        SpawnPowerUp();
+
+        //Comprobar en que cena estamos para saber que instanciar
+        if (SceneManager.GetActiveScene().name == "Game_Poison")
+        {
+            SpawnPoisonFood1();
+            SpawnPoisonFood2();
+        }
+        if (SceneManager.GetActiveScene().name == "Game_PowerUp")
+        {
+            SpawnPowerUp();
+            
+        }
+
     }
 
     public bool TrySnakeEatFood(Vector2Int snakeGridPosition)
     {
         if (snakeGridPosition == foodGridPosition)
         {
+            
             Object.Destroy(foodGameObject);
             SpawnFood();
-            Object.Destroy(poisonFoodGameObject1);
-           
-            if(hasPoisonFood1==false)
+            
+            if (SceneManager.GetActiveScene().name == "Game_Poison")
             {
+                Object.Destroy(poisonFoodGameObject1);
                 SpawnPoisonFood1();
+                Object.Destroy(poisonFoodGameObject2);
+                SpawnPoisonFood2();
             }
+
+
 
             Score.AddScore(Score.POINTS);
             return true;
@@ -53,8 +77,8 @@ public class LevelGrid
         if (snakeGridPosition == poisonFoodGridPosition1)
         {
             Object.Destroy(poisonFoodGameObject1);
-            hasPoisonFood1 = true;
-           
+            
+            SpawnPoisonFood1();
             return true;
         }
         else
@@ -62,10 +86,25 @@ public class LevelGrid
             return false;
         }
     }
+    public bool TrySnakeEatPoisonFood2(Vector2Int snakeGridPosition)
+    {
+        if(snakeGridPosition==poisonFoodGridPosition2)
+        {
+            Object.Destroy(poisonFoodGameObject2);
+            
+            return true;
+        }
+        else
+        {
+            return false;
+        }
 
+
+    }
     public bool TrySnakeEatPowerUp(Vector2Int snakeGridPosition)
     {
-        if (snakeGridPosition == powerUpGridPosition&& hasPowerUp==false && GameManager.levelPU==true)
+        //si coincidimos con powerUp y bool hasPowerUp=false==>(no lo llevamos activado), lo activamos desde SnakeScript
+        if (snakeGridPosition == powerUpGridPosition&& hasPowerUp==false)
         {
             Object.Destroy(powerUpGameObject);
             SpawnPowerUp();
@@ -112,8 +151,23 @@ public class LevelGrid
 
         poisonFoodGameObject1 = new GameObject("PoisonFood1");
         SpriteRenderer poisonFoodSpriteRenderer1 = poisonFoodGameObject1.AddComponent<SpriteRenderer>();
-        poisonFoodSpriteRenderer1.sprite = GameAssets.Instance.poisonFoodSprite1;
+        poisonFoodSpriteRenderer1.sprite = GameAssets_Pois.Instance.poisonFoodSprite1;
         poisonFoodGameObject1.transform.position = new Vector3(poisonFoodGridPosition1.x, poisonFoodGridPosition1.y, 0);
+    }
+
+    private void SpawnPoisonFood2()
+    {
+        do
+        {
+            poisonFoodGridPosition2 = new Vector2Int(
+                Random.Range(-width / 2, width / 2),
+                Random.Range(-height / 2, height / 2));
+        } while (snake.GetFullSnakeBodyGridPosition().IndexOf(poisonFoodGridPosition2) != -1);
+
+        poisonFoodGameObject2 = new GameObject("PoisonFood2");
+        SpriteRenderer poisonFoodSpriteRenderer2 = poisonFoodGameObject2.AddComponent<SpriteRenderer>();
+        poisonFoodSpriteRenderer2.sprite = GameAssets_Pois.Instance.poisonFoodSprite2;
+        poisonFoodGameObject2.transform.position = new Vector3(poisonFoodGridPosition2.x, poisonFoodGridPosition2.y, 0);
     }
 
     private void SpawnPowerUp()
@@ -127,7 +181,7 @@ public class LevelGrid
 
         powerUpGameObject = new GameObject("PowerUp");
         SpriteRenderer powerUpSpriteRenderer = powerUpGameObject.AddComponent<SpriteRenderer>();
-        powerUpSpriteRenderer.sprite = GameAssets.Instance.powerUpSprite;
+        powerUpSpriteRenderer.sprite = GameAssets_PowerUp.Instance.powerUpSprite;
         powerUpGameObject.transform.position = new Vector3(powerUpGridPosition.x, powerUpGridPosition.y, 0);
     }
 

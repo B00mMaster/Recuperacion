@@ -1,25 +1,22 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
+//public abstract class Vehicle
+//{
+//    public string name;
+//}
 
+//public class Car : Vehicle
+//{
+//    public string model;
+//}
 
-
-
-public abstract class Vehicle
-{
-    public string name;
-}
-
-public class Car : Vehicle
-{
-    public string model;
-}
-
-public class Bike : Vehicle
-{
-    public int power;
-}
+//public class Bike : Vehicle
+//{
+//    public int power;
+//}
 
 
 public class GameOverUI : MonoBehaviour
@@ -37,7 +34,7 @@ public class GameOverUI : MonoBehaviour
     {
 
 
-        Vehicle v = new Car();
+        //Vehicle v = new Car();
 
         
         
@@ -47,12 +44,16 @@ public class GameOverUI : MonoBehaviour
         }
 
         Instance = this;
+
         
-        restartButton.onClick.AddListener(() => {Loader.Load(Loader.Scene.Game);});
 
         Hide();
     }
-
+    public void LoadSceneGame(string Game)
+    {
+        SceneManager.LoadScene(Game);
+    }
+   
     public void Show(bool hasNewHighScore)
     {
         UpdateScoreAndHighScore(hasNewHighScore);

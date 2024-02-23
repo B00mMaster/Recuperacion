@@ -1,3 +1,5 @@
+using System.Collections;
+using TMPro;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -6,10 +8,10 @@ public class GameManager : MonoBehaviour
 
     private LevelGrid levelGrid;
     private Snake snake;
-    public static bool levelPU;
-    public static bool levelPois;
+
+
     private bool isPaused;
-    
+   
     private void Awake()
     {
         // Singleton
@@ -20,11 +22,13 @@ public class GameManager : MonoBehaviour
 
         Instance = this;
     }
-    
-    private void Start()
+
+    void Start()
     {
         SoundManager.CreateSoundManagerGameObject();
-        
+
+       
+
         // Configuración de la cabeza de serpiente
         GameObject snakeHeadGameObject = new GameObject("Snake Head");
         SpriteRenderer snakeSpriteRenderer = snakeHeadGameObject.AddComponent<SpriteRenderer>();
@@ -62,6 +66,9 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+
+
+   
 
     public void SnakeDied()
     {
